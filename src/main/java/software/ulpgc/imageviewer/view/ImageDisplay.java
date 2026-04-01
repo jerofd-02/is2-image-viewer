@@ -1,13 +1,22 @@
 package software.ulpgc.imageviewer.view;
 
-import software.ulpgc.imageviewer.model.Image;
-
 public interface ImageDisplay {
-    void show(Image image, int offset);
-    interface Dragging {
-        void on(int offset);
+    void on(Shift shift);
+
+    void on(Released released);
+
+    void paint(Paint... paints);
+
+    int width();
+
+    interface Shift {
+        void offset(int value);
     }
-    interface Release {
-        void on(int offset, int width);
+
+    interface Released {
+        void offset(int value);
+    }
+
+    record Paint(byte[] bitmap, int offset) {
     }
 }

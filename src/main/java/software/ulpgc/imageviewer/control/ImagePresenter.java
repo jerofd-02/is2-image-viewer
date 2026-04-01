@@ -2,66 +2,34 @@ package software.ulpgc.imageviewer.control;
 
 import software.ulpgc.imageviewer.model.Image;
 import software.ulpgc.imageviewer.view.ImageDisplay;
+import software.ulpgc.imageviewer.view.ImageDisplay.Paint;
 
 public class ImagePresenter {
     private final ImageDisplay display;
     private Image image;
-    private boolean dragging;
-    private int initialOffset;
 
-    public ImagePresenter(ImageDisplay display, Image initialImage) {
+    public ImagePresenter(ImageDisplay display) {
         this.display = display;
-        show(initialImage, 0);
+        this.display.on((ImageDisplay.Shift) offset -> display.paint(
+                new Paint(image.bitmap(), offset),
+                new Paint(
+                        offset < 0 ? image.next().bitmap() : image.previous().bitmap(),
+                        offset < 0 ? display.width() + offset : offset - display.width()
+                )
+        ));
+        this.display.on((ImageDisplay.Released) offset -> {
+            if (Math.abs(offset) * 2 > display.width()) image = offset < 0 ? image.next() : image.previous();
+            System.out.println(image.id());
+            display.paint(new Paint(image.bitmap(), 0));
+        });
     }
 
-    private void show(Image image, int offset) {
+    public void show(Image image) {
         this.image = image;
-        display.show(image, offset);
+        this.display.paint(new Paint(image.bitmap(), 0));
     }
 
-    public void next() {
-        show(image.next(), 0);
+    public Image image() {
+        return image;
     }
-
-    public void previous() {
-        show(image.previous(), 0);
-    }
-
-    public ImageDisplay.Dragging getDraggingListeners() {
-        return new ImageDisplay.Dragging() {
-            @Override
-            public void on(int offset) {
-                setDragging(offset);
-                show(image, offset - initialOffset);
-            }
-        };
-    }
-
-    public ImageDisplay.Release getReleaseListeners() {
-        return new ImageDisplay.Release() {
-            @Override
-            public void on(int offset, int width) {
-                unsetDragging();
-                if (offset > width / 2)  {
-                    previous();
-                    return;
-                } else if (offset < width / 2) {
-                    next();
-                    return;
-                }
-            }
-        };
-    }
-
-    private void setDragging(int offset) {
-        if (dragging) return;
-        dragging = true;
-        initialOffset = offset;
-    }
-
-    private void unsetDragging() {
-        dragging = false;
-        initialOffset = 0;
-    }
-
 }

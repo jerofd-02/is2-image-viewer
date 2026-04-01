@@ -1,15 +1,11 @@
 package software.ulpgc.imageviewer.model;
 
 public interface Image {
-    String name();
-    byte[] content();
-    Format format();
+    String id();
+
+    byte[] bitmap();
+
     Image next();
+
     Image previous();
-
-    enum Format {
-        jpg, Jpeg, Png, Gif
-    }
-
-    record Dimension(int width, int height) {}
 }
